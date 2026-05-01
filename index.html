@@ -1,148 +1,913 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Swift Core Tools – ARC, Memory Management & Closure Analysis</title>
-
-<meta name="description" content="Advanced Swift tools to visualize ARC, analyze memory management, debug closure captures, and optimize optional handling in iOS and Swift applications.">
-
-<meta name="keywords" content="swift arc visualizer, swift memory management analyzer, swift closure capture analyzer, swift optional unwrapping checker, swift code formatter tool">
-
 <meta name="google-site-verification" content="PkLa_ViOo6FAHpvh8SacceMb95o9tePRdrqLNBz9X1M" />
+<meta name="robots" content="index, follow">
+
+<title>Swift Code Analysis – Free Swift Static Analyzer, ARC &amp; Memory Leak Checker</title>
+
+<meta name="description" content="Free Swift code analysis tool. Paste Swift code to detect force unwraps, retain cycles, missing weak self in closures, try! usage, print statements in production, and common Swift anti-patterns. Instant analysis, no install.">
+
+<meta name="keywords" content="swift code analysis, swift static analysis, swift code analyzer, swift force unwrap checker, swift retain cycle detector, swift arc analysis, swift memory leak checker, swift lint online, swift code quality tool">
+
+<link rel="canonical" href="https://franrivalbigprojects.github.io/swift-core-tools/">
+
+<meta property="og:title" content="Swift Code Analysis – Free Static Analyzer and Memory Leak Checker">
+<meta property="og:description" content="Paste Swift code to detect force unwraps, retain cycles, missing weak self, and common Swift anti-patterns. Free analysis, no install.">
+<meta property="og:type" content="website">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
+:root {
+  --bg: #080408;
+  --surface: #100810;
+  --surface2: #180c18;
+  --border: #221020;
+  --border2: #301830;
+  --swift: #f97316;
+  --swift-dim: rgba(249,115,22,0.12);
+  --swift-dim2: rgba(249,115,22,0.05);
+  --swift-glow: rgba(249,115,22,0.18);
+  --red: #f87171;
+  --red-dim: rgba(248,113,113,0.1);
+  --orange: #fb923c;
+  --orange-dim: rgba(251,146,60,0.08);
+  --yellow: #fbbf24;
+  --yellow-dim: rgba(251,191,36,0.08);
+  --green: #22c55e;
+  --green-dim2: rgba(34,197,94,0.05);
+  --blue: #60a5fa;
+  --blue-dim: rgba(96,165,250,0.08);
+  --text: #e0c8d8;
+  --text-muted: #5a3858;
+  --text-dim: #201028;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Inter', sans-serif;
+  --r: 8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-    font-family: Arial, sans-serif;
-    background: #020617;
-    color: #e5e7eb;
-    margin: 0;
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 44px 44px;
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: 0;
 }
 
 header {
-    background: linear-gradient(90deg, #f97316, #ef4444);
-    padding: 30px;
-    text-align: center;
+  border-bottom: 1px solid var(--border2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(8,4,8,0.97);
+  backdrop-filter: blur(12px);
+}
+
+.header-inner {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.logo-pill {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--swift);
+  background: var(--swift-dim2);
+  border: 1px solid rgba(249,115,22,0.3);
+  border-radius: 3px;
+  padding: 3px 9px;
+}
+
+.logo-text { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+.logo-text strong { color: var(--swift); font-weight: 500; }
+
+.wrapper {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+  position: relative;
+  z-index: 1;
+}
+
+.hero {
+  padding: 48px 0 28px;
+  border-bottom: 1px solid var(--border2);
+  margin-bottom: 22px;
+}
+
+.hero-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--swift);
+  margin-bottom: 12px;
+  opacity: 0.8;
 }
 
 h1 {
-    margin: 0;
-    font-size: 2.5rem;
+  font-size: clamp(22px, 3.2vw, 30px);
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 10px;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
-.container {
-    max-width: 1100px;
-    margin: auto;
-    padding: 20px;
+h1 em { font-style: normal; color: var(--swift); }
+
+.hero-sub {
+  font-size: 15px;
+  color: var(--text-muted);
+  max-width: 620px;
+  line-height: 1.75;
+  margin-bottom: 16px;
 }
 
-.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
+.hero-sub strong { color: var(--text); }
+
+.pill-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 3px 9px;
+  border-radius: 3px;
+  border: 1px solid;
+}
+.pill-s  { color: var(--swift); background: var(--swift-dim2); border-color: rgba(249,115,22,0.3); }
+.pill-dim { color: var(--text-muted); border-color: var(--border2); }
+
+/* TOOL */
+.tool-shell {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  overflow: hidden;
+  margin-bottom: 18px;
 }
 
-.card {
-    background: #0f172a;
-    padding: 20px;
-    border-radius: 14px;
-    border: 1px solid #1e293b;
-    transition: 0.3s;
+.tool-topbar {
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border2);
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-.card:hover {
-    transform: translateY(-6px);
-    border-color: #f97316;
+.topbar-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
-a {
-    text-decoration: none;
-    color: #22c55e;
-    font-weight: bold;
-    display: inline-block;
-    margin-top: 10px;
+.btn-sm {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid;
+  background: transparent;
+  transition: opacity 0.15s;
+}
+.btn-sm:hover { opacity: 0.75; }
+.btn-swift { color: var(--swift); border-color: rgba(249,115,22,0.3); background: var(--swift-dim2); }
+.btn-ghost { color: var(--text-muted); border-color: var(--border2); }
+
+/* SPLIT */
+.editor-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 360px;
 }
 
-a:hover {
-    color: #4ade80;
+.pane-left {
+  border-right: 1px solid var(--border2);
+  display: flex;
+  flex-direction: column;
 }
 
-footer {
-    text-align: center;
-    padding: 20px;
-    border-top: 1px solid #1e293b;
-    margin-top: 40px;
-    font-size: 0.9rem;
+.pane-head {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-dim);
+  padding: 7px 14px;
+  border-bottom: 1px solid var(--border2);
+  background: var(--surface2);
+  display: flex;
+  justify-content: space-between;
+}
+
+.swift-textarea {
+  flex: 1;
+  width: 100%;
+  min-height: 310px;
+  padding: 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.65;
+  background: var(--bg);
+  border: none;
+  color: var(--text);
+  resize: none;
+  tab-size: 4;
+}
+.swift-textarea:focus { outline: none; }
+
+.pane-right {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#resultsPane {
+  flex: 1;
+  padding: 12px;
+  overflow-y: auto;
+  min-height: 310px;
+}
+
+.idle-msg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 280px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  text-align: center;
+  gap: 8px;
+}
+
+.action-bar {
+  padding: 12px 18px;
+  border-top: 1px solid var(--border2);
+  background: var(--surface2);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-analyze {
+  padding: 10px 26px;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--swift);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 0 14px var(--swift-glow);
+  transition: opacity 0.15s;
+}
+.btn-analyze:hover { opacity: 0.87; }
+
+/* RESULTS */
+.score-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+
+.score-grade { font-family: var(--mono); font-size: 26px; font-weight: 600; width: 36px; text-align: center; flex-shrink: 0; }
+.score-meta strong { display: block; font-size: 13px; color: #fff; margin-bottom: 2px; }
+.score-meta span   { font-family: var(--mono); font-size: 11px; color: var(--text-muted); }
+
+.stat-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.sch { background: var(--bg); border: 1px solid var(--border2); border-radius: 4px; padding: 6px 10px; text-align: center; min-width: 54px; }
+.sch-num { font-family: var(--mono); font-size: 15px; font-weight: 600; line-height: 1; display: block; margin-bottom: 2px; }
+.sch-lbl { font-family: var(--mono); font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.07em; }
+
+.finding {
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-left: 3px solid;
+  border-radius: 0 var(--r) var(--r) 0;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.f-error   { border-left-color: var(--red); }
+.f-warning { border-left-color: var(--yellow); }
+.f-info    { border-left-color: var(--blue); }
+.f-pass    { border-left-color: var(--green); }
+
+.f-head { display: flex; align-items: center; gap: 7px; margin-bottom: 2px; }
+.f-badge {
+  font-size: 9px; padding: 1px 6px; border-radius: 2px; border: 1px solid;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.fb-error   { color: var(--red);    background: var(--red-dim);   border-color: rgba(248,113,113,0.2); }
+.fb-warning { color: var(--yellow); background: var(--yellow-dim);border-color: rgba(251,191,36,0.2); }
+.fb-info    { color: var(--blue);   background: var(--blue-dim);  border-color: rgba(96,165,250,0.2); }
+.fb-pass    { color: var(--green);  background: var(--green-dim2);border-color: rgba(34,197,94,0.2); }
+
+.f-title { font-weight: 600; color: var(--text); font-size: 11px; }
+.f-body  { color: var(--text-muted); font-size: 11px; line-height: 1.5; }
+
+/* SECTION */
+hr.divider { border: none; border-top: 1px solid var(--border2); margin: 50px 0; }
+.content-section { margin-bottom: 50px; }
+
+.sec-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.sec-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--swift);
+  white-space: nowrap;
+  opacity: 0.7;
+}
+
+.sec-rule { flex: 1; height: 1px; background: var(--border2); }
+
+p { font-size: 14px; color: var(--text-muted); line-height: 1.8; margin-bottom: 10px; max-width: 820px; }
+p strong { color: var(--text); }
+
+code {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--surface2);
+  color: var(--swift);
+  padding: 2px 7px;
+  border-radius: 3px;
+  border: 1px solid var(--border2);
+}
+
+.dense-block {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 22px;
+  margin-top: 14px;
+}
+
+.dense-block p { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border2); max-width: none; }
+.dense-block p:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+
+.faq-list {
+  margin-top: 14px;
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+
+.faq-item { border-bottom: 1px solid var(--border2); }
+.faq-item:last-child { border-bottom: none; }
+
+.faq-q {
+  width: 100%;
+  text-align: left;
+  background: var(--surface);
+  border: none;
+  padding: 13px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  font-family: var(--sans);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  transition: background 0.15s;
+}
+
+.faq-q:hover { background: var(--swift-dim2); }
+.faq-arrow { font-family: var(--mono); font-size: 11px; color: var(--text-dim); transition: transform 0.2s; flex-shrink: 0; }
+.faq-item.open .faq-arrow { transform: rotate(180deg); }
+
+.faq-a {
+  display: none;
+  padding: 0 18px 13px;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.75;
+  border-top: 1px solid var(--border2);
+  background: var(--bg);
+}
+
+.faq-item.open .faq-a { display: block; }
+.faq-a code { color: var(--swift); background: var(--swift-dim2); }
+
+.subtools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.stl {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 12px 14px;
+  text-decoration: none;
+  display: block;
+  transition: border-color 0.15s;
+}
+
+.stl:hover { border-color: rgba(249,115,22,0.3); }
+.stl-eye  { font-family: var(--mono); font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 4px; }
+.stl-name { font-family: var(--mono); font-size: 12px; color: var(--swift); font-weight: 500; }
+
+.tag-cloud { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 50px; }
+.tag {
+  font-family: var(--mono); font-size: 10px; color: var(--text-muted);
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 100px; padding: 4px 12px; cursor: default;
+}
+.tag:hover { color: var(--swift); border-color: rgba(249,115,22,0.3); }
+
+footer { border-top: 1px solid var(--border2); padding: 20px 0; position: relative; z-index: 1; }
+.footer-inner {
+  max-width: 1060px; margin: 0 auto; padding: 0 24px;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 8px;
+}
+footer p { font-family: var(--mono); font-size: 11px; color: var(--text-dim); margin: 0; }
+
+@media (max-width: 640px) {
+  .editor-split { grid-template-columns: 1fr; }
+  .pane-left    { border-right: none; border-bottom: 1px solid var(--border2); }
 }
 </style>
+
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Swift Code Analyzer","applicationCategory":"DeveloperApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Free Swift code analysis tool. Paste Swift code to detect force unwraps, retain cycles, missing weak self in closures, try! usage, print statements, implicitly unwrapped optionals, and common Swift anti-patterns. Instant analysis, no install.","featureList":"Force unwrap detection, retain cycle detection, weak self checker, try! detection, implicitly unwrapped optional, print statement detection, SwiftLint rules reference"}
+</script>
+
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What are the best Swift static analysis tools?","acceptedAnswer":{"@type":"Answer","text":"Top Swift static analysis tools: SwiftLint (most popular, 200+ rules, integrates with Xcode) — install via Homebrew: brew install swiftlint. Periphery (finds unused code). SonarQube with Swift plugin (for enterprise CI/CD). Sitrep (GitHub codebase analyzer). SWAN (academic, deep analysis). Xcode's built-in Analyze (Product → Analyze) — finds retain cycles, unreachable code, and logic issues. For CI/CD: SwiftLint + Danger (GitHub PR comments) is the standard combination in most iOS teams."}},{"@type":"Question","name":"What is a retain cycle in Swift?","acceptedAnswer":{"@type":"Answer","text":"A retain cycle occurs when two objects hold strong references to each other, preventing ARC from deallocating either. Most common in closures: when a closure captures self strongly and self holds the closure, creating a cycle. Fix: use [weak self] or [unowned self] in the closure capture list. Example: DispatchQueue.main.async { [weak self] in self?.doSomething() }. Use [weak self] when the closure may outlive self (async operations, callbacks). Use [unowned self] only when self is guaranteed to outlive the closure."}}]}
+</script>
+
 </head>
 
 <body>
-
 <header>
-    <h1>Swift Core Tools</h1>
-    <p>Analyze memory, ARC and core Swift behaviors</p>
+  <div class="header-inner">
+    <span class="logo-pill">Swift</span>
+    <span class="logo-text"><strong>swift</strong>-code-analysis</span>
+  </div>
 </header>
 
-<div class="container">
+<div class="wrapper">
 
-<section>
-<h2>Swift Core & Memory Analysis Toolkit</h2>
-<p>
-These Swift core tools are designed for iOS developers and backend engineers working with Swift.
-Visualize ARC behavior, analyze memory management, debug closure capture issues, and ensure safe
-optional handling in modern Swift applications.
-</p>
-</section>
+  <section class="hero">
+    <p class="hero-eyebrow">// iOS &amp; Swift Development</p>
+    <h1>Free <em>Swift Code Analysis</em> Tool —<br>Static Analyzer &amp; Anti-Pattern Checker</h1>
+    <p class="hero-sub">
+      Paste Swift code to detect <strong>force unwraps, retain cycles, missing weak self</strong>, dangerous try!, and common Swift anti-patterns. Instant grade, no install.
+    </p>
+    <div class="pill-row">
+      <span class="pill pill-s">Force Unwrap</span>
+      <span class="pill pill-s">Retain Cycles</span>
+      <span class="pill pill-dim">weak self</span>
+      <span class="pill pill-dim">try!</span>
+      <span class="pill pill-dim">SwiftLint rules</span>
+    </div>
+  </section>
 
-<section class="grid">
+  <!-- TOOL -->
 
-<div class="card">
-<h3>ARC Visualizer</h3>
-<p>Visualize automatic reference counting behavior.</p>
-<a href="swift_core_tools/swift_arc_visualizer">swift_core_tools/swift_arc_visualizer</a>
+  <div class="tool-shell">
+    <div class="tool-topbar">
+      <span class="topbar-label">// Swift Code Analyzer</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-sm btn-swift" id="sampleBtn">Load Sample</button>
+        <button class="btn-sm btn-ghost" id="clearBtn">Clear</button>
+      </div>
+    </div>
+
+```
+<div class="editor-split">
+  <div class="pane-left">
+    <div class="pane-head">
+      <span>// Paste Swift code</span>
+      <span id="lineCount">0 lines</span>
+    </div>
+    <textarea class="swift-textarea" id="swiftInput" spellcheck="false"></textarea>
+  </div>
+  <div class="pane-right">
+    <div class="pane-head"><span>// Analysis results</span></div>
+    <div id="resultsPane">
+      <div class="idle-msg">
+        <span style="font-size:28px;opacity:0.1;">&#9670;</span>
+        <span>Paste Swift code and click<br>Analyze Swift Code</span>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="card">
-<h3>Closure Capture Analyzer</h3>
-<p>Analyze closure capture lists and memory impact.</p>
-<a href="swift_core_tools/swift_closure_capture_analyzer">swift_core_tools/swift_closure_capture_analyzer</a>
+<div class="action-bar">
+  <button class="btn-analyze" id="analyzeBtn">Analyze Swift Code</button>
+  <button class="btn-sm btn-ghost" id="clearBtn2">Reset</button>
+  <span id="statusMsg" style="font-family:var(--mono);font-size:11px;color:var(--text-dim);"></span>
 </div>
+```
 
-<div class="card">
-<h3>Code Formatter</h3>
-<p>Format Swift code following best practices.</p>
-<a href="swift_core_tools/swift_code_formatter">swift_core_tools/swift_code_formatter</a>
-</div>
+  </div>
 
-<div class="card">
-<h3>Memory Management Analyzer</h3>
-<p>Inspect memory usage and leaks.</p>
-<a href="swift_core_tools/swift_memory_management_analyzer">swift_core_tools/swift_memory_management_analyzer</a>
-</div>
+  <hr class="divider">
 
-<div class="card">
-<h3>Optional Unwrapping Checker</h3>
-<p>Validate optional handling and safety.</p>
-<a href="swift_core_tools/swift_optional_unwrapping_checker">swift_core_tools/swift_optional_unwrapping_checker</a>
-</div>
+  <!-- GUIDE -->
 
-</section>
+  <section class="content-section">
+    <div class="sec-head">
+      <span class="sec-label">Swift code quality guide</span>
+      <span class="sec-rule"></span>
+    </div>
+    <div class="dense-block">
+      <p><strong>Force unwrapping (!)</strong><br>
+      Using <code>!</code> to force-unwrap an optional crashes if the value is nil. Every <code>!</code> is a time bomb. Replace with: <code>guard let</code> or <code>if let</code> for optional binding. <code>??</code> for providing a default value. <code>guard let self</code> inside closures. The only acceptable uses of <code>!</code>: IBOutlets (Xcode-generated, always set before use), known-safe cases with a clear comment explaining why the value cannot be nil. SwiftLint's <code>force_unwrapping</code> rule flags all <code>!</code> uses.</p>
+      <p><strong>Retain cycles in closures — the #1 Swift memory leak</strong><br>
+      When a closure captures <code>self</code> strongly and <code>self</code> holds a reference to the closure, neither can be deallocated. Fix: add <code>[weak self]</code> to the closure capture list: <code>DispatchQueue.main.async { [weak self] in self?.updateUI() }</code>. Use <code>[weak self]</code> for escaping closures (async callbacks, completion handlers, NotificationCenter observers). Use <code>[unowned self]</code> only when self is guaranteed to outlive the closure — crash if wrong. The Xcode Analyze tool (Product → Analyze) detects many retain cycles automatically.</p>
+      <p><strong>Best Swift static analysis tools</strong><br>
+      <strong>SwiftLint</strong> — the industry standard, 200+ rules. Install: <code>brew install swiftlint</code>. Add as Xcode build phase or <code>swiftlint lint</code> in CI. <strong>Periphery</strong> — finds unused code (dead code elimination). <strong>Xcode Analyze</strong> (Product → Analyze) — built-in, finds retain cycles and logic issues. <strong>SonarQube with Swift plugin</strong> — enterprise CI/CD. This online tool provides quick pattern-based analysis for immediate feedback.</p>
+    </div>
+  </section>
 
-<section>
-<h2>Why Swift Core Analysis Matters</h2>
-<p>
-Swift is designed for safety and performance, but understanding ARC, closures, and memory management
-is critical to avoid leaks and crashes. These tools help developers write safer and more efficient code.
-</p>
-</section>
+  <!-- FAQ -->
+
+  <section class="content-section">
+    <div class="sec-head">
+      <span class="sec-label">FAQ — Swift code analysis</span>
+      <span class="sec-rule"></span>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">What are the best Swift static analysis tools?<span class="faq-arrow">&#9660;</span></button>
+        <div class="faq-a"><strong>SwiftLint</strong> — most popular, 200+ rules, Homebrew: <code>brew install swiftlint</code>. Add to Xcode build phases or run in CI. <strong>Periphery</strong> — detects unused code. <strong>Xcode Analyze</strong> (Product → Analyze) — built-in, finds retain cycles, unreachable code. <strong>SonarQube</strong> + Swift plugin for enterprise. <strong>Sitrep</strong> — GitHub codebase stats. For CI/CD: SwiftLint + Danger (PR comments) is the standard combination. This tool provides fast pattern-based analysis without setup.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">What is a retain cycle in Swift and how do I fix it?<span class="faq-arrow">&#9660;</span></button>
+        <div class="faq-a">A retain cycle occurs when two objects hold strong references to each other — neither can be deallocated. Most common: a closure captures self strongly and self holds the closure. Fix with <code>[weak self]</code> in the capture list: <code>networkCall { [weak self] result in self?.handle(result) }</code>. Detection: run Xcode Instruments (Leaks template), use Xcode Analyze, or check this tool for missing <code>[weak self]</code> patterns. Delegates should also be <code>weak var delegate</code> to avoid retain cycles between parent and child.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">When is force unwrapping (!) acceptable in Swift?<span class="faq-arrow">&#9660;</span></button>
+        <div class="faq-a">Force unwrapping is acceptable in limited cases: (1) <strong>IBOutlets</strong> — Xcode-generated, guaranteed set before use. (2) <strong>Testing code</strong> — crashes reveal bugs immediately. (3) <strong>Truly impossible nil</strong> — with a clear comment explaining why. Always prefer: <code>guard let</code> for required values, <code>if let</code> for optional handling, <code>??</code> for defaults. The SwiftLint <code>force_unwrapping</code> rule flags all <code>!</code>. Consider enabling it as a warning to gradually eliminate force unwraps from a codebase.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="sec-head">
+      <span class="sec-label">Swift core tools</span>
+      <span class="sec-rule"></span>
+    </div>
+    <div class="subtools-grid">
+      <a href="swift_core_tools/swift_arc_visualizer/" class="stl"><p class="stl-eye">arc //</p><span class="stl-name">ARC Visualizer</span></a>
+      <a href="swift_core_tools/swift_closure_capture_analyzer/" class="stl"><p class="stl-eye">closures //</p><span class="stl-name">Closure Capture Analyzer</span></a>
+      <a href="swift_core_tools/swift_memory_management_analyzer/" class="stl"><p class="stl-eye">memory //</p><span class="stl-name">Memory Management Analyzer</span></a>
+      <a href="swift_core_tools/swift_optional_unwrapping_checker/" class="stl"><p class="stl-eye">optionals //</p><span class="stl-name">Optional Unwrapping Checker</span></a>
+      <a href="swift_core_tools/swift_code_formatter/" class="stl"><p class="stl-eye">format //</p><span class="stl-name">Code Formatter</span></a>
+    </div>
+  </section>
+
+  <div class="tag-cloud">
+    <span class="tag">swift code analysis</span>
+    <span class="tag">swift static analysis</span>
+    <span class="tag">swift code analyzer</span>
+    <span class="tag">swiftlint online</span>
+    <span class="tag">swift force unwrap checker</span>
+    <span class="tag">swift retain cycle detector</span>
+    <span class="tag">swift arc analysis</span>
+    <span class="tag">swift memory leak checker</span>
+    <span class="tag">swift code quality</span>
+    <span class="tag">swift anti-patterns</span>
+  </div>
 
 </div>
 
 <footer>
-<p>© 2026 Swift Core Tools – Safe memory, optimized performance, better code</p>
+  <div class="footer-inner">
+    <p>swift-code-analysis &middot; static analyzer &middot; free &middot; github pages</p>
+    <p>force unwrap &middot; retain cycles &middot; weak self &middot; swiftlint</p>
+  </div>
 </footer>
+
+<script>
+var RULES = [
+  {
+    level: 'error',
+    title: 'Force unwrap (!) detected',
+    check: function(src) {
+      var lines = src.split('\n');
+      var hits = [];
+      lines.forEach(function(line, i) {
+        var t = line.trim();
+        if (/\/\//.test(t) && t.indexOf('//') < t.indexOf('!')) return;
+        if (/!/.test(t) && !/!=|!=/g.test(t.replace(/\s*!=\s*/g, ''))) {
+          var forceMatches = t.match(/\w+!/g);
+          if (forceMatches) hits.push(i + 1);
+        }
+      });
+      if (hits.length > 0) {
+        return hits.length + ' force unwrap(s) on line(s) ' + hits.slice(0, 5).join(', ') + '. Use if let, guard let, or ?? instead. Force unwraps crash if the value is nil.';
+      }
+      return null;
+    }
+  },
+  {
+    level: 'error',
+    title: 'try! — dangerous force-try detected',
+    check: function(src) {
+      var count = (src.match(/\btry!\b/g) || []).length;
+      if (count > 0) {
+        return count + ' try! usage(s). Force-try crashes the entire app if the expression throws. Use do-catch or try? instead.';
+      }
+      return null;
+    }
+  },
+  {
+    level: 'error',
+    title: 'Missing [weak self] in escaping closure',
+    check: function(src) {
+      var hasEscapingClosure = /(\bDispatchQueue\b|\bURLSession\b|\bNotificationCenter\b|\bcompletion\b|\bcompletionHandler\b|\banimateWithDuration\b|\bperform\b.*after:)/.test(src);
+      var hasWeakSelf = /\[weak self\]/.test(src);
+      var hasSelfInClosure = /\}\s*\{[\s\S]{0,300}self\./m.test(src) || /closure.*self\./i.test(src);
+      if (hasEscapingClosure && !hasWeakSelf && (hasSelfInClosure || /self\./.test(src))) {
+        return 'Escaping closure pattern detected with self usage but no [weak self] capture list. This may cause a retain cycle. Add [weak self] to escaping closure capture lists.';
+      }
+      return null;
+    }
+  },
+  {
+    level: 'warning',
+    title: 'Implicitly Unwrapped Optional (!) in property declaration',
+    check: function(src) {
+      var iuoProps = src.match(/var\s+\w+\s*:\s*[\w<>?\[\]]+!/g);
+      if (iuoProps && iuoProps.length > 0) {
+        var nonOutlet = iuoProps.filter(function(p) { return !/IBOutlet|IBAction/.test(src.split(p)[0].split('\n').slice(-2).join('\n')); });
+        if (nonOutlet.length > 0) {
+          return nonOutlet.length + ' implicitly unwrapped optional(s) in property declaration. Use regular optionals (?) unless this is an IBOutlet or a property guaranteed to be set in init.';
+        }
+      }
+      return null;
+    }
+  },
+  {
+    level: 'warning',
+    title: 'print() statements detected — remove before production',
+    check: function(src) {
+      var count = (src.match(/^\s*print\s*\(/mg) || []).length;
+      if (count > 0) {
+        return count + ' print() statement(s) found. Use os_log, Logger (iOS 14+), or a logging framework in production. Print statements have performance overhead and expose sensitive data in logs.';
+      }
+      return null;
+    }
+  },
+  {
+    level: 'warning',
+    title: 'Strong delegate — should be weak',
+    check: function(src) {
+      if (/var\s+delegate\s*:/.test(src) && !/weak\s+var\s+delegate/.test(src)) {
+        return 'Delegate property is not declared as weak. Delegates are typically weak to avoid retain cycles. Use: weak var delegate: MyProtocol?';
+      }
+      return null;
+    }
+  },
+  {
+    level: 'warning',
+    title: 'unowned self — prefer weak self',
+    check: function(src) {
+      if (/\[unowned self\]/.test(src)) {
+        return '[unowned self] detected. unowned self crashes if self is nil when the closure executes. Prefer [weak self] and handle the optional safely, unless you are certain self will outlive the closure.';
+      }
+      return null;
+    }
+  },
+  {
+    level: 'info',
+    title: 'TODO or FIXME comments',
+    check: function(src) {
+      var todos = (src.match(/\/\/\s*(TODO|FIXME|HACK):/gi) || []).length;
+      if (todos > 0) {
+        return todos + ' TODO/FIXME comment(s). Track these as issues — SwiftLint\'s todo rule can enforce no TODOs in production builds.';
+      }
+      return null;
+    }
+  },
+  {
+    level: 'info',
+    title: 'Large file — consider refactoring',
+    check: function(src) {
+      var lines = src.split('\n').length;
+      if (lines > 300) {
+        return 'File has ' + lines + ' lines. SwiftLint recommends max 400 lines per file. Consider splitting into smaller, focused types.';
+      }
+      return null;
+    }
+  }
+];
+
+function el(tag, cls) {
+  var e = document.createElement(tag);
+  if (cls) e.className = cls;
+  return e;
+}
+
+function makeFinding(level, title, body) {
+  var lm = { error: 'f-error', warning: 'f-warning', info: 'f-info', pass: 'f-pass' };
+  var bm = { error: 'fb-error', warning: 'fb-warning', info: 'fb-info', pass: 'fb-pass' };
+  var ll = { error: 'ERROR', warning: 'WARNING', info: 'INFO', pass: 'PASS' };
+  var card = el('div', 'finding ' + (lm[level] || 'f-info'));
+  var head = el('div', 'f-head');
+  head.appendChild(Object.assign(el('span', 'f-badge ' + (bm[level] || 'fb-info')), { textContent: ll[level] || 'INFO' }));
+  head.appendChild(Object.assign(el('span', 'f-title'), { textContent: title }));
+  card.appendChild(head);
+  if (body) card.appendChild(Object.assign(el('div', 'f-body'), { textContent: body }));
+  return card;
+}
+
+function gradeFromFindings(errors, warnings) {
+  var score = 100 - errors * 20 - warnings * 8;
+  score = Math.max(5, Math.min(100, score));
+  if (score >= 90) return { grade: 'A', label: 'Excellent Swift quality', color: 'var(--green)' };
+  if (score >= 75) return { grade: 'B', label: 'Good',                   color: 'var(--blue)' };
+  if (score >= 55) return { grade: 'C', label: 'Needs improvement',      color: 'var(--yellow)' };
+  if (score >= 35) return { grade: 'D', label: 'Poor quality',           color: 'var(--orange)' };
+  return { grade: 'F', label: 'Critical issues', color: 'var(--red)' };
+}
+
+function runAnalysis() {
+  var src    = document.getElementById('swiftInput').value;
+  var status = document.getElementById('statusMsg');
+
+  if (!src.trim()) { status.textContent = 'Paste Swift code first.'; return; }
+
+  var findings = [];
+  RULES.forEach(function(rule) {
+    var r = rule.check(src);
+    if (r) findings.push({ level: rule.level, title: rule.title, body: r });
+  });
+
+  var errors   = findings.filter(function(f) { return f.level === 'error'; }).length;
+  var warnings = findings.filter(function(f) { return f.level === 'warning'; }).length;
+  var infos    = findings.filter(function(f) { return f.level === 'info'; }).length;
+  var grade    = gradeFromFindings(errors, warnings);
+
+  if (findings.length === 0) {
+    findings.push({ level: 'pass', title: 'No common issues detected', body: 'Code passes pattern-based checks. For comprehensive analysis run SwiftLint and Xcode Analyze.' });
+  }
+
+  var pane = document.getElementById('resultsPane');
+  pane.innerHTML = '';
+
+  var banner = el('div', 'score-banner');
+  banner.style.borderColor = grade.color;
+  var gradeEl = Object.assign(el('div', 'score-grade'), { textContent: grade.grade });
+  gradeEl.style.color = grade.color;
+  var meta = el('div', 'score-meta');
+  var ms = Object.assign(el('strong'), { textContent: 'Grade ' + grade.grade + ': ' + grade.label });
+  ms.style.color = grade.color;
+  meta.appendChild(ms);
+  meta.appendChild(Object.assign(el('span'), { textContent: errors + ' error(s) · ' + warnings + ' warning(s) · ' + infos + ' info' }));
+  banner.appendChild(gradeEl); banner.appendChild(meta);
+  pane.appendChild(banner);
+
+  var chips = el('div', 'stat-chips');
+  function makeChip(val, lbl, color) {
+    var c = el('div', 'sch');
+    var n = Object.assign(el('span', 'sch-num'), { textContent: String(val) });
+    n.style.color = color;
+    var l = Object.assign(el('span', 'sch-lbl'), { textContent: lbl });
+    c.appendChild(n); c.appendChild(l);
+    return c;
+  }
+  chips.appendChild(makeChip(errors,   'Errors',   'var(--red)'));
+  chips.appendChild(makeChip(warnings, 'Warnings', 'var(--yellow)'));
+  chips.appendChild(makeChip(infos,    'Info',     'var(--blue)'));
+  chips.appendChild(makeChip(src.split('\n').length, 'Lines', 'var(--text-muted)'));
+  pane.appendChild(chips);
+
+  findings.forEach(function(f) { pane.appendChild(makeFinding(f.level, f.title, f.body)); });
+
+  status.textContent = errors + ' error(s), ' + warnings + ' warning(s).';
+  status.style.color = errors > 0 ? 'var(--red)' : warnings > 0 ? 'var(--yellow)' : 'var(--green)';
+}
+
+function loadSample() {
+  var sample = [
+    'import UIKit',
+    '',
+    'class UserProfileViewController: UIViewController {',
+    '',
+    '    @IBOutlet weak var nameLabel: UILabel!',
+    '    var delegate: UserProfileDelegate?  // should be weak',
+    '    var userData: UserData!  // IUO — consider regular optional',
+    '',
+    '    override func viewDidLoad() {',
+    '        super.viewDidLoad()',
+    '        // TODO: Add proper error handling',
+    '        let name = userData.name!  // force unwrap risk',
+    '        nameLabel.text = name',
+    '        print("User loaded: \\(name)")',
+    '    }',
+    '',
+    '    func loadUserData(completion: @escaping (Result<UserData, Error>) -> Void) {',
+    '        NetworkService.shared.fetchUser { result in',
+    '            // Missing [weak self] - retain cycle risk',
+    '            self.userData = try! result.get()  // try! — crashes on error',
+    '            self.delegate?.profileDidUpdate()',
+    '            DispatchQueue.main.async {',
+    '                self.tableView.reloadData()',
+    '            }',
+    '        }',
+    '    }',
+    '}'
+  ].join('\n');
+
+  document.getElementById('swiftInput').value = sample;
+  updateLineCount();
+  runAnalysis();
+}
+
+function clearAll() {
+  document.getElementById('swiftInput').value = '';
+  document.getElementById('lineCount').textContent = '0 lines';
+  document.getElementById('statusMsg').textContent = '';
+  var pane = document.getElementById('resultsPane');
+  pane.innerHTML = '';
+  var idle = el('div', 'idle-msg');
+  var icon = Object.assign(el('span'), { textContent: '\u25c7' });
+  icon.style.cssText = 'font-size:28px;opacity:0.1;';
+  var hint = Object.assign(el('span'), { textContent: 'Paste Swift code and click\nAnalyze Swift Code' });
+  idle.appendChild(icon); idle.appendChild(hint);
+  pane.appendChild(idle);
+}
+
+function updateLineCount() {
+  var v = document.getElementById('swiftInput').value;
+  document.getElementById('lineCount').textContent = (v ? v.split('\n').length : 0) + ' lines';
+}
+
+function toggleFaq(btn) {
+  btn.parentElement.classList.toggle('open');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('swiftInput').placeholder = 'Paste Swift code here...';
+  document.getElementById('analyzeBtn').addEventListener('click', runAnalysis);
+  document.getElementById('sampleBtn').addEventListener('click', loadSample);
+  document.getElementById('clearBtn').addEventListener('click', clearAll);
+  document.getElementById('clearBtn2').addEventListener('click', clearAll);
+  document.getElementById('swiftInput').addEventListener('input', updateLineCount);
+});
+</script>
 
 </body>
 </html>
