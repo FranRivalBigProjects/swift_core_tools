@@ -7,17 +7,19 @@
 <meta name="google-site-verification" content="PkLa_ViOo6FAHpvh8SacceMb95o9tePRdrqLNBz9X1M" />
 <meta name="robots" content="index, follow">
 
-<title>Swift Code Analysis – Free Swift Static Analyzer, ARC &amp; Memory Leak Checker</title>
+<title>Swift Code Analysis – Free Swift Static Analyzer, ARC, Memory Leak &amp; Security Checker</title>
 
-<meta name="description" content="Free Swift code analysis tool. Paste Swift code to detect force unwraps, retain cycles, missing weak self in closures, try! usage, print statements in production, and common Swift anti-patterns. Instant analysis, no install.">
+<meta name="description" content="Free Swift code analysis tool. Paste Swift code to detect force unwraps, retain cycles, missing weak self in closures, try! usage, hardcoded API keys/secrets, print statements in production, and common Swift anti-patterns. Instant analysis, no install.">
 
-<meta name="keywords" content="swift code analysis, swift static analysis, swift code analyzer, swift force unwrap checker, swift retain cycle detector, swift arc analysis, swift memory leak checker, swift lint online, swift code quality tool">
+<meta name="keywords" content="swift code analysis, swift static analysis, swift code analyzer, swift force unwrap checker, swift retain cycle detector, swift arc analysis, swift memory leak checker, swift lint online, swift code quality tool, swift security scanner, swift hardcoded secrets detection, swift static code analysis security">
 
-<link rel="canonical" href="https://franrivalbigprojects.github.io/swift-core-tools/">
+<!-- FIX: canonical corregido de swift-core-tools (guion) a swift_core_tools (guion bajo), que es la URL real del proyecto -->
+<link rel="canonical" href="https://franrivalbigprojects.github.io/swift_core_tools/">
 
-<meta property="og:title" content="Swift Code Analysis – Free Static Analyzer and Memory Leak Checker">
-<meta property="og:description" content="Paste Swift code to detect force unwraps, retain cycles, missing weak self, and common Swift anti-patterns. Free analysis, no install.">
+<meta property="og:title" content="Swift Code Analysis – Free Static Analyzer, Memory Leak & Security Checker">
+<meta property="og:description" content="Paste Swift code to detect force unwraps, retain cycles, missing weak self, hardcoded secrets, and common Swift anti-patterns. Free analysis, no install.">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://franrivalbigprojects.github.io/swift_core_tools/">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -487,11 +489,11 @@ footer p { font-family: var(--mono); font-size: 11px; color: var(--text-dim); ma
 </style>
 
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Swift Code Analyzer","applicationCategory":"DeveloperApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Free Swift code analysis tool. Paste Swift code to detect force unwraps, retain cycles, missing weak self in closures, try! usage, print statements, implicitly unwrapped optionals, and common Swift anti-patterns. Instant analysis, no install.","featureList":"Force unwrap detection, retain cycle detection, weak self checker, try! detection, implicitly unwrapped optional, print statement detection, SwiftLint rules reference"}
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Swift Code Analyzer","applicationCategory":"DeveloperApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Free Swift code analysis tool. Paste Swift code to detect force unwraps, retain cycles, missing weak self in closures, try! usage, hardcoded API keys/secrets, print statements, implicitly unwrapped optionals, and common Swift anti-patterns. Instant analysis, no install.","featureList":"Force unwrap detection, retain cycle detection, weak self checker, try! detection, implicitly unwrapped optional, print statement detection, hardcoded secret/API key detection, SwiftLint rules reference"}
 </script>
 
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What are the best Swift static analysis tools?","acceptedAnswer":{"@type":"Answer","text":"Top Swift static analysis tools: SwiftLint (most popular, 200+ rules, integrates with Xcode) — install via Homebrew: brew install swiftlint. Periphery (finds unused code). SonarQube with Swift plugin (for enterprise CI/CD). Sitrep (GitHub codebase analyzer). SWAN (academic, deep analysis). Xcode's built-in Analyze (Product → Analyze) — finds retain cycles, unreachable code, and logic issues. For CI/CD: SwiftLint + Danger (GitHub PR comments) is the standard combination in most iOS teams."}},{"@type":"Question","name":"What is a retain cycle in Swift?","acceptedAnswer":{"@type":"Answer","text":"A retain cycle occurs when two objects hold strong references to each other, preventing ARC from deallocating either. Most common in closures: when a closure captures self strongly and self holds the closure, creating a cycle. Fix: use [weak self] or [unowned self] in the closure capture list. Example: DispatchQueue.main.async { [weak self] in self?.doSomething() }. Use [weak self] when the closure may outlive self (async operations, callbacks). Use [unowned self] only when self is guaranteed to outlive the closure."}}]}
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What are the best Swift static analysis tools?","acceptedAnswer":{"@type":"Answer","text":"Top Swift static analysis tools: SwiftLint (most popular, 200+ rules, integrates with Xcode) — install via Homebrew: brew install swiftlint. Periphery (finds unused code). SonarQube with Swift plugin (for enterprise CI/CD). Sitrep (GitHub codebase analyzer). SWAN (academic, deep analysis). Xcode's built-in Analyze (Product → Analyze) — finds retain cycles, unreachable code, and logic issues. For CI/CD: SwiftLint + Danger (GitHub PR comments) is the standard combination in most iOS teams."}},{"@type":"Question","name":"What is a retain cycle in Swift?","acceptedAnswer":{"@type":"Answer","text":"A retain cycle occurs when two objects hold strong references to each other, preventing ARC from deallocating either. Most common in closures: when a closure captures self strongly and self holds the closure, creating a cycle. Fix: use [weak self] or [unowned self] in the closure capture list. Example: DispatchQueue.main.async { [weak self] in self?.doSomething() }. Use [weak self] when the closure may outlive self (async operations, callbacks). Use [unowned self] only when self is guaranteed to outlive the closure."}},{"@type":"Question","name":"How do I find hardcoded secrets and API keys in Swift code?","acceptedAnswer":{"@type":"Answer","text":"Hardcoded secrets are one of the most common mobile security findings in Swift apps. Search your codebase for string literals assigned to variables named apiKey, secret, token, or password. Never store credentials in source code, UserDefaults, or Info.plist — use Keychain Services instead. This tool includes a pattern-based check that flags likely hardcoded secrets automatically when you paste your code."}}]}
 </script>
 
 </head>
@@ -510,11 +512,12 @@ footer p { font-family: var(--mono); font-size: 11px; color: var(--text-dim); ma
     <p class="hero-eyebrow">// iOS &amp; Swift Development</p>
     <h1>Free <em>Swift Code Analysis</em> Tool —<br>Static Analyzer &amp; Anti-Pattern Checker</h1>
     <p class="hero-sub">
-      Paste Swift code to detect <strong>force unwraps, retain cycles, missing weak self</strong>, dangerous try!, and common Swift anti-patterns. Instant grade, no install.
+      Paste Swift code to detect <strong>force unwraps, retain cycles, missing weak self</strong>, dangerous try!, hardcoded secrets, and common Swift anti-patterns. Instant grade, no install.
     </p>
     <div class="pill-row">
       <span class="pill pill-s">Force Unwrap</span>
       <span class="pill pill-s">Retain Cycles</span>
+      <span class="pill pill-s">Hardcoded Secrets</span>
       <span class="pill pill-dim">weak self</span>
       <span class="pill pill-dim">try!</span>
       <span class="pill pill-dim">SwiftLint rules</span>
@@ -580,6 +583,25 @@ footer p { font-family: var(--mono); font-size: 11px; color: var(--text-dim); ma
     </div>
   </section>
 
+  <!-- SECURITY -->
+
+  <section class="content-section">
+    <div class="sec-head">
+      <span class="sec-label">Swift security static analysis</span>
+      <span class="sec-rule"></span>
+    </div>
+    <div class="dense-block">
+      <p><strong>Hardcoded API keys and secrets</strong><br>
+      Storing API keys, tokens, or credentials directly in Swift source code is one of the most common findings in mobile security reviews. Anyone who decompiles or inspects strings inside your compiled <code>.ipa</code> can extract hardcoded values. Never assign secrets to string literals or store them in <code>UserDefaults</code> or <code>Info.plist</code> — use <code>Keychain Services</code> instead. This tool's analyzer flags likely hardcoded secrets automatically based on common variable naming patterns (<code>apiKey</code>, <code>secret</code>, <code>token</code>, <code>password</code>).</p>
+      <p><strong>Insecure network configuration</strong><br>
+      Disabling App Transport Security via <code>NSAllowsArbitraryLoads</code> in <code>Info.plist</code>, or using plain <code>http://</code> URLs instead of <code>https://</code>, exposes network traffic to interception. Only add ATS exceptions for specific domains when strictly necessary, and document why.</p>
+      <p><strong>Sensitive data in logs</strong><br>
+      <code>print()</code> statements that output tokens, session identifiers, or personal data persist in device console logs and can surface in crash reports. This is also why the analyzer above flags every <code>print()</code> call as a warning — treat it as both a code-quality and a security signal.</p>
+      <p><strong>Where this fits alongside dedicated SAST tools</strong><br>
+      For deeper, CI-integrated security scanning of Swift/iOS codebases, dedicated SAST tools such as Semgrep, mobsfscan, or MobSF cover a broader rule set including taint analysis and OWASP Mobile Top 10 checks. This tool is meant for a fast, pattern-based first pass you can run in seconds without any setup — not a replacement for a full security audit.</p>
+    </div>
+  </section>
+
   <!-- FAQ -->
 
   <section class="content-section">
@@ -599,6 +621,10 @@ footer p { font-family: var(--mono); font-size: 11px; color: var(--text-dim); ma
       <div class="faq-item">
         <button class="faq-q" onclick="toggleFaq(this)">When is force unwrapping (!) acceptable in Swift?<span class="faq-arrow">&#9660;</span></button>
         <div class="faq-a">Force unwrapping is acceptable in limited cases: (1) <strong>IBOutlets</strong> — Xcode-generated, guaranteed set before use. (2) <strong>Testing code</strong> — crashes reveal bugs immediately. (3) <strong>Truly impossible nil</strong> — with a clear comment explaining why. Always prefer: <code>guard let</code> for required values, <code>if let</code> for optional handling, <code>??</code> for defaults. The SwiftLint <code>force_unwrapping</code> rule flags all <code>!</code>. Consider enabling it as a warning to gradually eliminate force unwraps from a codebase.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">How do I find hardcoded secrets and API keys in Swift code?<span class="faq-arrow">&#9660;</span></button>
+        <div class="faq-a">Hardcoded secrets are one of the most common mobile security findings in Swift apps. Search your codebase for string literals assigned to variables named <code>apiKey</code>, <code>secret</code>, <code>token</code>, or <code>password</code>. Never store credentials in source code, <code>UserDefaults</code>, or <code>Info.plist</code> — use <code>Keychain Services</code> instead. This tool includes a pattern-based check that flags likely hardcoded secrets automatically when you paste your code.</div>
       </div>
     </div>
   </section>
@@ -628,6 +654,9 @@ footer p { font-family: var(--mono); font-size: 11px; color: var(--text-dim); ma
     <span class="tag">swift memory leak checker</span>
     <span class="tag">swift code quality</span>
     <span class="tag">swift anti-patterns</span>
+    <span class="tag">swift security scanner</span>
+    <span class="tag">swift hardcoded secrets</span>
+    <span class="tag">swift static code analysis security</span>
   </div>
 
 </div>
@@ -635,7 +664,7 @@ footer p { font-family: var(--mono); font-size: 11px; color: var(--text-dim); ma
 <footer>
   <div class="footer-inner">
     <p>swift-code-analysis &middot; static analyzer &middot; free &middot; github pages</p>
-    <p>force unwrap &middot; retain cycles &middot; weak self &middot; swiftlint</p>
+    <p>force unwrap &middot; retain cycles &middot; weak self &middot; hardcoded secrets &middot; swiftlint</p>
   </div>
 </footer>
 
@@ -686,6 +715,18 @@ var RULES = [
     }
   },
   {
+    level: 'error',
+    title: 'Possible hardcoded secret / API key detected',
+    check: function(src) {
+      var pattern = /(apiKey|api_key|apiSecret|api_secret|secretKey|secret_key|accessToken|access_token|clientSecret|client_secret|password|token|secret)\s*[:=]\s*["'][A-Za-z0-9_\-\.]{12,}["']/gi;
+      var matches = src.match(pattern) || [];
+      if (matches.length > 0) {
+        return matches.length + ' possible hardcoded secret(s) or API key(s) detected. Never commit credentials to source — move them to Keychain Services or a secrets manager, and rotate any keys that were exposed.';
+      }
+      return null;
+    }
+  },
+  {
     level: 'warning',
     title: 'Implicitly Unwrapped Optional (!) in property declaration',
     check: function(src) {
@@ -705,7 +746,7 @@ var RULES = [
     check: function(src) {
       var count = (src.match(/^\s*print\s*\(/mg) || []).length;
       if (count > 0) {
-        return count + ' print() statement(s) found. Use os_log, Logger (iOS 14+), or a logging framework in production. Print statements have performance overhead and expose sensitive data in logs.';
+        return count + ' print() statement(s) found. Use os_log, Logger (iOS 14+), or a logging framework in production. Print statements have performance overhead and can expose sensitive data in device logs.';
       }
       return null;
     }
@@ -726,6 +767,21 @@ var RULES = [
     check: function(src) {
       if (/\[unowned self\]/.test(src)) {
         return '[unowned self] detected. unowned self crashes if self is nil when the closure executes. Prefer [weak self] and handle the optional safely, unless you are certain self will outlive the closure.';
+      }
+      return null;
+    }
+  },
+  {
+    level: 'warning',
+    title: 'Insecure network configuration (ATS disabled or http://)',
+    check: function(src) {
+      var hasAts = /NSAllowsArbitraryLoads/.test(src);
+      var hasHttp = /["']http:\/\/(?!localhost|127\.0\.0\.1)[^"']+["']/.test(src);
+      if (hasAts || hasHttp) {
+        var parts = [];
+        if (hasAts) parts.push('NSAllowsArbitraryLoads (disables App Transport Security)');
+        if (hasHttp) parts.push('plain http:// URL(s)');
+        return 'Found ' + parts.join(' and ') + '. Prefer https:// and avoid ATS exceptions unless a specific domain truly requires them.';
       }
       return null;
     }
@@ -849,13 +905,14 @@ function loadSample() {
     '    @IBOutlet weak var nameLabel: UILabel!',
     '    var delegate: UserProfileDelegate?  // should be weak',
     '    var userData: UserData!  // IUO — consider regular optional',
+    '    let apiKey: String = "sk_live_51H8xTn2eZvKYlo2C9pQrLm"  // hardcoded secret risk',
     '',
     '    override func viewDidLoad() {',
     '        super.viewDidLoad()',
     '        // TODO: Add proper error handling',
     '        let name = userData.name!  // force unwrap risk',
     '        nameLabel.text = name',
-    '        print("User loaded: \\(name)")',
+    '        print("User loaded: \\(name), key: \\(apiKey)")',
     '    }',
     '',
     '    func loadUserData(completion: @escaping (Result<UserData, Error>) -> Void) {',
